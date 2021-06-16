@@ -1,5 +1,5 @@
 ---
-title: "Presentation Ninja"
+title: "bnmonitor"
 subtitle: "⚔<br/>with xaringan"
 author: "Yihui Xie"
 institute: "RStudio, PBC"

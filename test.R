@@ -1,7 +1,66 @@
 library("bnmonitor")
 library("bnlearn")
 library("qgraph")
+library("ggplot2")
 
+
+load("diabetes.RData")
+
+dag  <- hc(diabetes)
+qgraph(dag)
+         
+global_monitor(dag = dag , df = diabetes,alpha=2)
+marg.preg <- plot(seq_marg_monitor(dag, diabetes, "PREG"))
+marg.gluc <- plot(seq_marg_monitor(dag, diabetes, "GLUC")) #weird, but ROOT NODE
+marg.pres <- plot(seq_marg_monitor(dag, diabetes, "PRES"))
+marg.tric <- plot(seq_marg_monitor(dag, diabetes, "TRIC"))
+marg.ins <- plot(seq_marg_monitor(dag, diabetes, "INS"))
+marg.mass <- plot(seq_marg_monitor(dag, diabetes, "MASS"))
+marg.ped <- plot(seq_marg_monitor(dag, diabetes, "PED"))
+marg.age <- plot(seq_marg_monitor(dag, diabetes, "AGE"))
+marg.diab <- plot(seq_marg_monitor(dag, diabetes, "DIAB"))#mildly weird,
+
+marg.preg + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+marg.gluc + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+marg.pres + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+marg.tric + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+marg.ins + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+marg.mass + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+marg.ped + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+marg.age + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+marg.diab + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+
+cond.preg <- plot(seq_cond_monitor(dag, diabetes, "PREG"))#some weird issues 
+cond.gluc <- plot(seq_cond_monitor(dag, diabetes, "GLUC"))
+cond.pres <- plot(seq_cond_monitor(dag, diabetes, "PRES"))
+cond.tric <- plot(seq_cond_monitor(dag, diabetes, "TRIC"))
+cond.ins <- plot(seq_cond_monitor(dag, diabetes, "INS"))
+cond.mass <- plot(seq_cond_monitor(dag, diabetes, "MASS"))
+cond.ped <- plot(seq_cond_monitor(dag, diabetes, "PED"))
+cond.age <- plot(seq_cond_monitor(dag, diabetes, "AGE"))
+cond.diab <- plot(seq_cond_monitor(dag, diabetes, "DIAB"))
+
+cond.preg + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+cond.gluc + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+cond.pres + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+cond.tric + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+cond.ins + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+cond.mass + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+cond.ped + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+cond.age + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+cond.diab + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+
+dim(diabetes)
+plot(1:392,ifelse(diabetes$PREG=="low",1,0))
+
+plot(seq_pa_ch_monitor(dag , diabetes , "DIAB",pa.names = c("GLUC","MASS"), pa.val = c("low","low"), alpha=2))+ geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+plot(seq_pa_ch_monitor(dag , diabetes , "DIAB",pa.names = c("GLUC","MASS"), pa.val = c("high","low"),alpha=2))+ geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+plot(seq_pa_ch_monitor(dag , diabetes , "DIAB",pa.names = c("GLUC","MASS"), pa.val = c("low","high"),alpha=2))+ geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+plot(seq_pa_ch_monitor(dag , diabetes , "DIAB",pa.names = c("GLUC","MASS"), pa.val = c("high","high"),alpha=2))+ geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+#low glucose, high body mass hard to predict diabetes
+
+plot(seq_pa_ch_monitor(dag , diabetes , "PREG",pa.names = "AGE", pa.val = "low",alpha=2))+ geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+plot(seq_pa_ch_monitor(dag , diabetes , "PREG",pa.names = "AGE", pa.val = "high",alpha=2))+ geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
 data(asia)
 data(coronary)
 data(survey)
