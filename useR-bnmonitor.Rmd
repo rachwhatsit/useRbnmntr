@@ -1,9 +1,8 @@
 ---
-title: "bnmonitor"
-subtitle: "⚔<br/>with xaringan"
-author: "Yihui Xie"
-institute: "RStudio, PBC"
-date: "2016/12/12 (updated: `r Sys.Date()`)"
+title: "`bnmonitor`: Checking the Robustness and Sensitivity of Bayesian Networks"
+author: "Rachel Wilkerson, Manuele Leonelli, Ramsiya Ramanathan"
+institute: "Baylor University, IE University, Madrid, Università di Bologna, Bologna, Italy"
+date: "July 9, 2021"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -14,12 +13,170 @@ output:
     xaringan::moon_reader:
       css: ["useR", "useR-fonts"]
 ---
+class: inverse, center, middle
 
-background-image: url(https://upload.wikimedia.org/wikipedia/commons/b/be/Sharingan_triple.svg)
+# Example
+
+---
+ Pima Indian Diabetes dataset 
+ 
+- PREG: number of times pregnant (low/high)
+
+- GLUC: plasma glucose concentration (low/high)
+
+- PRES: diastolic blood pressure (low/high)
+
+- TRIC: triceps skin fold thickness (low/high)
+
+- INS: 2-hour serum insulin (low/high)
+
+- MASS: body mass index (low/high)
+
+- PED: diabetes pedigree function (low/high)
+
+- AGE: age (low/high)
+
+- DIAB: test for diabetes (neg/pos)
+
+392 observations
+
+- We chose this dataset as it best showcases our monitors. However, we acknowledge that we are using the data in this capacity without compensating the original Akimel O’odham participants. 
+The isolation imposed by the political boundaries of this isolation created a useful dataset at the expense of the liberty of the Akimel O’odham. 
+
+???
+We chose this dataset after running many examples because we think it best showcases how our monitors can check the structure of a Bayes Net. 
+---
 
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
+
+library("bnmonitor")
+library("bnlearn")
+library("qgraph")
+library("ggplot2")
+
+load("diabetes.RData")
 ```
+
+```{r eval=require('DT'), tidy=FALSE}
+DT::datatable(
+  head(diabetes, 10),
+  fillContainer = FALSE, options = list(pageLength = 8)
+)
+```
+---
+# Bayesian Network 
+
+```{r dag}
+
+dag  <- hc(diabetes)
+qgraph(dag)
+```
+
+---
+class: inverse, center, middle
+
+# Robustness
+
+---
+``` {r glb}
+global_monitor(dag = dag , df = diabetes,alpha=2)
+```
+
+- $\alpha$ is commonly set as the maximum number of levels for a node in the dataset
+
+???
+global monitors are used to compare moodels
+---
+# Prequential Monitors
+
+\citet{Dawid1992} and were developed in \citet{Cowell2006,Cowell2007}
+- $p_i$ gives the predictive density of the BN learned using the dataset $x_{[i-1]}$ including only the first $i-1$-th observations
+
+- the level of surprise of observing the value $y_j\in\mathbb{Y}_j$ for the $j$-th variable after having processed $i$ observations is:  
+$$S_{ij} = -\log(p_i(y_j)))$$
+
+- We use the logarithmic score function here, but other score functions can certainly be used. 
+
+---
+# Standardization
+
+- Relative standardization compares the log likelihood contributions to two different models. 
+
+- Absolute standardization computes a Z-statistic using the following expectation and variance
+
+- $$E_{ij} = \sum_{y_j\in\mathbb{Y}_j}p_i(y_j)\log(p_i(y_j))$$
+
+- $$V_{ij}=\sum_{y_j\in\mathbb{Y}_j}p_i(y_j)\log(p_i(y_j))^2-E_{ij}^2$$
+
+- $$Z_{ij}=\frac{\sum_{k=1}^iS_{kj}-\sum_{k=1}^iE_{kj}}{\sqrt{\sum_{k=1}^i}V_{kj}}$$
+
+- values of and  $| Z_{ij}|> 1.96$ in absolute value may be an indication of poor model fit
+
+---
+# Marginal node monitors 
+
+- Marginal and conditional node monitors check the appropriateness of the probability distributions of each node
+
+``` {r node good fit,warning=FALSE, include=FALSE}
+marg.ped <- plot(seq_marg_monitor(dag, diabetes, "PED"))
+marg.ped + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+```
+
+- The marginal node monitor for PED (diabetes pedigree function) indicates a good fit.
+
+???
+Node monitors are used to assess the accuracty of forecasts.
+We are most often concerned about this with the 'final outcome' nodes. 
+Here the pedigree of diabetes suggests that the forecasts flowing from the model are accurate.
+---
+# Marginal node monitors 
+
+``` {r node bad fit, warning=FALSE, include=FALSE}
+marg.diab <- plot(seq_marg_monitor(dag, diabetes, "DIAB"))
+marg.diab + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+```
+
+- The marginal node monitor for DIAB (diabetes) suggests that the the marginal distribution may be inappropriate for later forecasts.
+
+???
+By contrast, the marginal sequential node monitor suggests that the probability distribution for the node  diabetes is not necessarily accurate for later observation in the data. 
+
+---
+# Conditional node monitors 
+
+``` {r cond monitor, warning=FALSE, include=FALSE}
+cond.preg <- plot(seq_cond_monitor(dag, diabetes, "PREG"))#some weird issues 
+cond.preg + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+```
+
+- The conditional node monitor for PREG (pregnancy) indicates a poor fit to early forecasts in the data. 
+
+---
+# Parent child monitor
+
+
+```{r pach monitor,warning=FALSE, include=FALSE}
+plot(seq_pa_ch_monitor(dag , diabetes , "PREG",pa.names = "AGE", pa.val = "low",alpha=2))+ geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+```
+
+??? 
+We can further probe this with the parent child monitor. 
+We check all possible values of the parent nodes and find that young women in particular are difficult to predict pregnancies for.
+
+---
+
+class: inverse, center, middle
+
+# Sensitivity
+
+---
+
+---
+
+
+background-image: url(https://upload.wikimedia.org/wikipedia/commons/b/be/Sharingan_triple.svg)
+
 
 ???
 
