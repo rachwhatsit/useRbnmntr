@@ -35,12 +35,22 @@ class: center, middle, inverse, title-slide
 
 ---
 
-class: inverse, center, middle
+ 
+# Package Overview
+- `bnmonitor` provides a suite of diagnostic monitors that can be used in increasing fineness to check the accuracy of forecasts flowing from a model 
 
-# Example
+- The sensitivity functions check the effect of changes to the probability distributions
+
+- Robustness monitors work on BNs learned from data
+
+- Sensitivity monitors work on BNs learned either from data or elicitation. Data can be either discrete or continous.
 
 ---
- Pima Indian Diabetes dataset 
+
+#Example: Diabetes 
+
+We illustrate our package with what the UCI Repository refers to as the Pima Indian dataset. 
+It consists of 392 observation with the following variables, discretized according to XX
  
 - PREG: number of times pregnant (low/high)
 
@@ -60,27 +70,25 @@ class: inverse, center, middle
 
 - DIAB: test for diabetes (neg/pos)
 
-392 observations
+---
 
-- We chose this dataset as it best showcases our monitors. However, we acknowledge that we are using the data in this capacity without compensating the original Akimel O’odham participants. 
+background-image: url("libs/img/women-Pima-shinny-game-field-hockey.jpeg")
+background-position: contain
+class: center, bottom, inverse
+
+We chose this dataset as it best showcases our monitors. However, we acknowledge that we are using the data without compensating the original Akimel O’odham participants. 
 The isolation imposed by the political boundaries of this isolation created a useful dataset at the expense of the liberty of the Akimel O’odham. 
+XX footnote digital natives
 
 ???
-We chose this dataset after running many examples because we think it best showcases how our monitors can check the structure of a Bayes Net. 
+Image credit: [Britannica](https://www.britannica.com/topic/Pima-people)
+
 ---
 
 
 
-
-```r
-DT::datatable(
-  head(diabetes, 10),
-  fillContainer = FALSE, options = list(pageLength = 8)
-)
-```
-
-<div id="htmlwidget-6af0201cf31e77fddb6a" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-6af0201cf31e77fddb6a">{"x":{"filter":"none","fillContainer":false,"data":[["4","5","7","9","14","15","17","19","20","21"],["low","low","high","high","low","high","low","low","low","high"],["low","high","low","high","high","high","low","low","low","high"],["low","low","low","high","low","high","high","low","high","high"],["low","high","high","high","low","low","high","high","high","high"],["low","high","low","high","high","high","high","low","low","high"],["low","high","low","low","low","low","high","high","high","high"],["low","high","low","low","low","high","high","low","high","high"],["low","high","low","high","high","high","high","high","high","high"],["neg","pos","pos","pos","pos","pos","pos","neg","pos","neg"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>PREG<\/th>\n      <th>GLUC<\/th>\n      <th>PRES<\/th>\n      <th>TRIC<\/th>\n      <th>INS<\/th>\n      <th>MASS<\/th>\n      <th>PED<\/th>\n      <th>AGE<\/th>\n      <th>DIAB<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}],"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-98ee0f3d60ff4299d637" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-98ee0f3d60ff4299d637">{"x":{"filter":"none","fillContainer":false,"data":[["4","5","7","9","14","15","17","19","20","21"],["low","low","high","high","low","high","low","low","low","high"],["low","high","low","high","high","high","low","low","low","high"],["low","low","low","high","low","high","high","low","high","high"],["low","high","high","high","low","low","high","high","high","high"],["low","high","low","high","high","high","high","low","low","high"],["low","high","low","low","low","low","high","high","high","high"],["low","high","low","low","low","high","high","low","high","high"],["low","high","low","high","high","high","high","high","high","high"],["neg","pos","pos","pos","pos","pos","pos","neg","pos","neg"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>PREG<\/th>\n      <th>GLUC<\/th>\n      <th>PRES<\/th>\n      <th>TRIC<\/th>\n      <th>INS<\/th>\n      <th>MASS<\/th>\n      <th>PED<\/th>\n      <th>AGE<\/th>\n      <th>DIAB<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}],"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 ---
 # Bayesian Network 
 
@@ -152,6 +160,32 @@ global monitors are used to compare moodels
 - Marginal and conditional node monitors check the appropriateness of the probability distributions of each node
 
 
+```r
+marg.ped &lt;- plot(seq_marg_monitor(dag, diabetes, "PED"))
+```
+
+```
+## 
+## Attaching package: 'gRbase'
+```
+
+```
+## The following object is masked from 'package:qgraph':
+## 
+##     qgraph
+```
+
+```
+## The following objects are masked from 'package:bnlearn':
+## 
+##     ancestors, children, parents
+```
+
+```r
+marg.ped + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+```
+
+![](useR-bnmonitor_files/figure-html/node good fit-1.png)&lt;!-- --&gt;
 
 - The marginal node monitor for PED (diabetes pedigree function) indicates a good fit.
 
@@ -163,6 +197,12 @@ Here the pedigree of diabetes suggests that the forecasts flowing from the model
 # Marginal node monitors 
 
 
+```r
+marg.diab &lt;- plot(seq_marg_monitor(dag, diabetes, "DIAB"))
+marg.diab + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+```
+
+![](useR-bnmonitor_files/figure-html/node bad fit-1.png)&lt;!-- --&gt;
 
 - The marginal node monitor for DIAB (diabetes) suggests that the the marginal distribution may be inappropriate for later forecasts.
 
@@ -173,6 +213,12 @@ By contrast, the marginal sequential node monitor suggests that the probability 
 # Conditional node monitors 
 
 
+```r
+cond.preg &lt;- plot(seq_cond_monitor(dag, diabetes, "PREG")) 
+cond.preg + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+```
+
+![](useR-bnmonitor_files/figure-html/cond monitor-1.png)&lt;!-- --&gt;
 
 - The conditional node monitor for PREG (pregnancy) indicates a poor fit to early forecasts in the data. 
 
@@ -181,8 +227,14 @@ By contrast, the marginal sequential node monitor suggests that the probability 
 
 
 
+```r
+plot(seq_pa_ch_monitor(dag , diabetes , "PREG",pa.names = "AGE", pa.val = "low",alpha=2))+ geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
+```
+
+![](useR-bnmonitor_files/figure-html/pach monitor-1.png)&lt;!-- --&gt;
 
 ??? 
+
 We can further probe this with the parent child monitor. 
 We check all possible values of the parent nodes and find that young women in particular are difficult to predict pregnancies for.
 
@@ -194,40 +246,57 @@ class: inverse, center, middle
 
 ---
 
+
+---
+
+```r
+sens_dc &lt;- sensitivity(bn, interest_node = "DIAB", interest_node_value = "pos", node = "GLUC", value_node = "high", value_parents = NULL, new_value = "all")
+sens_dic  &lt;-   sensitivity(bn , interest_node = "DIAB",interest_node_value =   "pos",evidence_nodes = "INS", evidence_states = "low",node = "GLUC", value_node = "high",value_parents = NULL , new_value = "all")
+par(mfrow=c(1,2))
+plot(sens_dc)
+```
+
+![](useR-bnmonitor_files/figure-html/sens-1.png)&lt;!-- --&gt;
+
+```r
+plot(sens_dic)  
+```
+
+![](useR-bnmonitor_files/figure-html/sens-2.png)&lt;!-- --&gt;
 ---
 
 
-background-image: url(https://upload.wikimedia.org/wikipedia/commons/b/be/Sharingan_triple.svg)
+```r
+cd_g &lt;- CD(bn , node = "GLUC", value_node = "high",value_parents = NULL , new_value = "all")
+cd_d &lt;- CD(bn , node = "DIAB", value_node = "pos",value_parents = c("high","high"), new_value = "all")
+par(mfrow=c(1,2))
+plot(cd_g); plot(cd_d)
+```
 
+![](useR-bnmonitor_files/figure-html/cd-1.png)&lt;!-- --&gt;![](useR-bnmonitor_files/figure-html/cd-2.png)&lt;!-- --&gt;
+---
+
+
+```r
+sensquery(bn, interest_node = "DIAB",interest_node_value = "pos", new_value = 0.4,evidence_nodes = "PRES", evidence_states = "high")
+```
+
+```
+##   Node Value node Value parents Original value Suggested change CD distance
+## 1 GLUC        low                   0.48724490        0.4409133   0.1864248
+## 2 PRES        low           low     0.60846561        0.6993007   0.4031032
+## 3 DIAB        pos       low,low     0.05660377        0.1250558   0.8680104
+## 4 MASS       high           low     0.26063830        0.4817689   0.9696970
+## 5  AGE        low       low,neg     0.70344828        0.9266871   1.6731065
+```
+
+---
 
 ???
 
 Image credit: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Sharingan_triple.svg)
 
----
-class: center, middle
 
-# xaringan
-
-### /ʃaː.'riŋ.ɡan/
-
----
-class: inverse, center, middle
-
-# Get Started
-
----
-
-# Hello World
-
-Install the **xaringan** package from [Github](https://github.com/yihui/xaringan):
-
-
-```r
-remotes::install_github("yihui/xaringan")
-```
-
---
 
 You are recommended to use the [RStudio IDE](https://www.rstudio.com/products/rstudio/), but you do not have to.
 
@@ -495,439 +564,8 @@ library(leaflet)
 leaflet() %&gt;% addTiles() %&gt;% setView(-93.65, 42.0285, zoom = 17)
 ```
 
-<div id="htmlwidget-63c52a8d96e6d9b4bcd2" style="width:100%;height:432px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-63c52a8d96e6d9b4bcd2">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]}],"setView":[[42.0285,-93.65],17,[]]},"evals":[],"jsHooks":[]}</script>
-
----
-
-
-```r
-DT::datatable(
-  head(iris, 10),
-  fillContainer = FALSE, options = list(pageLength = 8)
-)
-```
-
-<div id="htmlwidget-e41adc7228bb34f0f16d" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-e41adc7228bb34f0f16d">{"x":{"filter":"none","fillContainer":false,"data":[["1","2","3","4","5","6","7","8","9","10"],[5.1,4.9,4.7,4.6,5,5.4,4.6,5,4.4,4.9],[3.5,3,3.2,3.1,3.6,3.9,3.4,3.4,2.9,3.1],[1.4,1.4,1.3,1.5,1.4,1.7,1.4,1.5,1.4,1.5],[0.2,0.2,0.2,0.2,0.2,0.4,0.3,0.2,0.2,0.1],["setosa","setosa","setosa","setosa","setosa","setosa","setosa","setosa","setosa","setosa"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Sepal.Length<\/th>\n      <th>Sepal.Width<\/th>\n      <th>Petal.Length<\/th>\n      <th>Petal.Width<\/th>\n      <th>Species<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"columnDefs":[{"className":"dt-right","targets":[1,2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
-
----
-
-# Some Tips
-
-- Do not forget to try the `yolo` option of `xaringan::moon_reader`.
-
-    ```yaml
-    output:
-      xaringan::moon_reader:
-        yolo: true
-    ```
-
----
-
-# Some Tips
-
-- Slides can be automatically played if you set the `autoplay` option under `nature`, e.g. go to the next slide every 30 seconds in a lightning talk:
-
-    ```yaml
-    output:
-      xaringan::moon_reader:
-        nature:
-          autoplay: 30000
-    ```
-
-- If you want to restart the play after it reaches the last slide, you may set the sub-option `loop` to TRUE, e.g.,
-
-    ```yaml
-    output:
-      xaringan::moon_reader:
-        nature:
-          autoplay:
-            interval: 30000
-            loop: true
-    ```
-
----
-
-# Some Tips
-
-- A countdown timer can be added to every page of the slides using the `countdown` option under `nature`, e.g. if you want to spend one minute on every page when you give the talk, you can set:
-
-    ```yaml
-    output:
-      xaringan::moon_reader:
-        nature:
-          countdown: 60000
-    ```
-
-    Then you will see a timer counting down from `01:00`, to `00:59`, `00:58`, ... When the time is out, the timer will continue but the time turns red.
-    
----
-
-# Some Tips
-
-- The title slide is created automatically by **xaringan**, but it is just another remark.js slide added before your other slides.
-
-    The title slide is set to `class: center, middle, inverse, title-slide` by default. You can change the classes applied to the title slide with the `titleSlideClass` option of `nature` (`title-slide` is always applied).
-
-    ```yaml
-    output:
-      xaringan::moon_reader:
-        nature:
-          titleSlideClass: [top, left, inverse]
-    ```
-    
---
-
-- If you'd like to create your own title slide, disable **xaringan**'s title slide with the `seal = FALSE` option of `moon_reader`.
-
-    ```yaml
-    output:
-      xaringan::moon_reader:
-        seal: false
-    ```
-
----
-
-# Some Tips
-
-- There are several ways to build incremental slides. See [this presentation](https://slides.yihui.org/xaringan/incremental.html) for examples.
-
-- The option `highlightLines: true` of `nature` will highlight code lines that start with `*`, or are wrapped in `{{ }}`, or have trailing comments `#&lt;&lt;`;
-
-    ```yaml
-    output:
-      xaringan::moon_reader:
-        nature:
-          highlightLines: true
-    ```
-
-    See examples on the next page.
-
----
-
-# Some Tips
-
-
-.pull-left[
-An example using a leading `*`:
-
-    ```r
-    if (TRUE) {
-    ** message("Very important!")
-    }
-    ```
-Output:
-```r
-if (TRUE) {
-* message("Very important!")
-}
-```
-
-This is invalid R code, so it is a plain fenced code block that is not executed.
-]
-
-.pull-right[
-An example using `{{}}`:
-
-````
-```{r tidy=FALSE}
-if (TRUE) {
-*{{ message("Very important!") }}
-}
-```
-````
-Output:
-
-```r
-if (TRUE) {
-* message("Very important!") 
-}
-```
-
-```
-## Very important!
-```
-
-It is valid R code so you can run it. Note that `{{}}` can wrap an R expression of multiple lines.
-]
-
----
-
-# Some Tips
-
-An example of using the trailing comment `#&lt;&lt;` to highlight lines:
-
-````markdown
-```{r tidy=FALSE}
-library(ggplot2)
-ggplot(mtcars) + 
-  aes(mpg, disp) + 
-  geom_point() +   #&lt;&lt;
-  geom_smooth()    #&lt;&lt;
-```
-````
-
-Output:
-
-
-```r
-library(ggplot2)
-ggplot(mtcars) + 
-  aes(mpg, disp) + 
-* geom_point() +
-* geom_smooth()
-```
-
----
-
-# Some Tips
-
-When you enable line-highlighting, you can also use the chunk option `highlight.output` to highlight specific lines of the text output from a code chunk. For example, `highlight.output = TRUE` means highlighting all lines, and `highlight.output = c(1, 3)` means highlighting the first and third line.
-
-````md
-```{r, highlight.output=c(1, 3)}
-head(iris)
-```
-````
-
-
-```
-*##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
-## 1          5.1         3.5          1.4         0.2  setosa
-*## 2          4.9         3.0          1.4         0.2  setosa
-## 3          4.7         3.2          1.3         0.2  setosa
-## 4          4.6         3.1          1.5         0.2  setosa
-## 5          5.0         3.6          1.4         0.2  setosa
-## 6          5.4         3.9          1.7         0.4  setosa
-```
-
-Question: what does `highlight.output = c(TRUE, FALSE)` mean? (Hint: think about R's recycling of vectors)
-
----
-
-# Some Tips
-
-- To make slides work offline, you need to download a copy of remark.js in advance, because **xaringan** uses the online version by default (see the help page `?xaringan::moon_reader`).
-
-- You can use `xaringan::summon_remark()` to download the latest or a specified version of remark.js. By default, it is downloaded to `libs/remark-latest.min.js`.
-
-- Then change the `chakra` option in YAML to point to this file, e.g.
-
-    ```yaml
-    output:
-      xaringan::moon_reader:
-        chakra: libs/remark-latest.min.js
-    ```
-
-- If you used Google fonts in slides (the default theme uses _Yanone Kaffeesatz_, _Droid Serif_, and _Source Code Pro_), they won't work offline unless you download or install them locally. The Heroku app [google-webfonts-helper](https://google-webfonts-helper.herokuapp.com/fonts) can help you download fonts and generate the necessary CSS.
-
----
-
-# Macros
-
-- remark.js [allows users to define custom macros](https://github.com/yihui/xaringan/issues/80) (JS functions) that can be applied to Markdown text using the syntax `![:macroName arg1, arg2, ...]` or `![:macroName arg1, arg2, ...](this)`. For example, before remark.js initializes the slides, you can define a macro named `scale`:
-
-    ```js
-    remark.macros.scale = function (percentage) {
-      var url = this;
-      return '&lt;img src="' + url + '" style="width: ' + percentage + '" /&gt;';
-    };
-    ```
-
-    Then the Markdown text
-
-    ```markdown
-    ![:scale 50%](image.jpg)
-    ```
-
-    will be translated to
-    
-    ```html
-    &lt;img src="image.jpg" style="width: 50%" /&gt;
-    ```
-
----
-
-# Macros (continued)
-
-- To insert macros in **xaringan** slides, you can use the option `beforeInit` under the option `nature`, e.g.,
-
-    ```yaml
-    output:
-      xaringan::moon_reader:
-        nature:
-          beforeInit: "macros.js"
-    ```
-
-    You save your remark.js macros in the file `macros.js`.
-
-- The `beforeInit` option can be used to insert arbitrary JS code before `remark.create()`. Inserting macros is just one of its possible applications.
-
----
-
-# CSS
-
-Among all options in `xaringan::moon_reader`, the most challenging but perhaps also the most rewarding one is `css`, because it allows you to customize the appearance of your slides using any CSS rules or hacks you know.
-
-You can see the default CSS file [here](https://github.com/yihui/xaringan/blob/master/inst/rmarkdown/templates/xaringan/resources/default.css). You can completely replace it with your own CSS files, or define new rules to override the default. See the help page `?xaringan::moon_reader` for more information.
-
----
-
-# CSS
-
-For example, suppose you want to change the font for code from the default "Source Code Pro" to "Ubuntu Mono". You can create a CSS file named, say, `ubuntu-mono.css`:
-
-```css
-@import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
-
-.remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
-```
-
-Then set the `css` option in the YAML metadata:
-
-```yaml
-output:
-  xaringan::moon_reader:
-    css: ["default", "ubuntu-mono.css"]
-```
-
-Here I assume `ubuntu-mono.css` is under the same directory as your Rmd.
-
-See [yihui/xaringan#83](https://github.com/yihui/xaringan/issues/83) for an example of using the [Fira Code](https://github.com/tonsky/FiraCode) font, which supports ligatures in program code.
-
----
-
-# CSS (with Sass)
-
-**xaringan** also supports Sass support via **rmarkdown**. Suppose you want to use the same color for different elements, e.g., first heading and bold text. You can create a `.scss` file, say `mytheme.scss`, using the [sass](https://sass-lang.com/) syntax with variables:
-
-```scss
-$mycolor: #ff0000; 
-.remark-slide-content &gt; h1 { color: $mycolor; }
-.remark-slide-content strong { color: $mycolor; }
-```
-
-Then set the `css` option in the YAML metadata using this file placed under the same directory as your Rmd:
-
-```yaml
-output:
-  xaringan::moon_reader:
-    css: ["default", "mytheme.scss"]
-```
-
-This requires **rmarkdown** &gt;= 2.8 and the [**sass**](https://rstudio.github.io/sass/) package. You can learn more about **rmarkdown** and **sass** support in [this blog post](https://blog.rstudio.com/2021/04/15/2021-spring-rmd-news/#sass-and-scss-support-for-html-based-output) and in [**sass** overview vignette](https://rstudio.github.io/sass/articles/sass.html).
-
----
-
-# Themes
-
-Don't want to learn CSS? Okay, you can use some user-contributed themes. A theme typically consists of two CSS files `foo.css` and `foo-fonts.css`, where `foo` is the theme name. Below are some existing themes:
-
-
-```r
-names(xaringan:::list_css())
-```
-
-```
-##  [1] "chocolate-fonts"  "chocolate"        "default-fonts"   
-##  [4] "default"          "duke-blue"        "fc-fonts"        
-##  [7] "fc"               "hygge-duke"       "hygge"           
-## [10] "ki-fonts"         "ki"               "kunoichi"        
-## [13] "lucy-fonts"       "lucy"             "metropolis-fonts"
-## [16] "metropolis"       "middlebury-fonts" "middlebury"      
-## [19] "nhsr-fonts"       "nhsr"             "ninjutsu"        
-## [22] "rladies-fonts"    "rladies"          "robot-fonts"     
-## [25] "robot"            "rutgers-fonts"    "rutgers"         
-## [28] "shinobi"          "tamu-fonts"       "tamu"            
-## [31] "uio-fonts"        "uio"              "uo-fonts"        
-## [34] "uo"               "uol-fonts"        "uol"             
-## [37] "useR-fonts"       "useR"
-```
-
----
-
-# Themes
-
-To use a theme, you can specify the `css` option as an array of CSS filenames (without the `.css` extensions), e.g.,
-
-```yaml
-output:
-  xaringan::moon_reader:
-    css: [default, metropolis, metropolis-fonts]
-```
-
-If you want to contribute a theme to **xaringan**, please read [this blog post](https://yihui.org/en/2017/10/xaringan-themes).
-
----
-class: inverse, middle, center
-background-image: url(https://upload.wikimedia.org/wikipedia/commons/3/39/Naruto_Shiki_Fujin.svg)
-background-size: contain
-
-# Naruto
-
----
-background-image: url(https://upload.wikimedia.org/wikipedia/commons/b/be/Sharingan_triple.svg)
-background-size: 100px
-background-position: 90% 8%
-
-# Sharingan
-
-The R package name **xaringan** was derived&lt;sup&gt;1&lt;/sup&gt; from **Sharingan**, a dōjutsu in the Japanese anime _Naruto_ with two abilities:
-
-- the "Eye of Insight"
-
-- the "Eye of Hypnotism"
-
-I think a presentation is basically a way to communicate insights to the audience, and a great presentation may even "hypnotize" the audience.&lt;sup&gt;2,3&lt;/sup&gt;
-
-.footnote[
-[1] In Chinese, the pronounciation of _X_ is _Sh_ /ʃ/ (as in _shrimp_). Now you should have a better idea of how to pronounce my last name _Xie_.
-
-[2] By comparison, bad presentations only put the audience to sleep.
-
-[3] Personally I find that setting background images for slides is a killer feature of remark.js. It is an effective way to bring visual impact into your presentations.
-]
-
----
-
-# Naruto terminology
-
-The **xaringan** package borrowed a few terms from Naruto, such as
-
-- [Sharingan](https://naruto.fandom.com/wiki/Sharingan) (写輪眼; the package name)
-
-- The [moon reader](https://naruto.fandom.com/wiki/Moon_Reader) (月読; an attractive R Markdown output format)
-
-- [Chakra](https://naruto.fandom.com/wiki/Chakra) (查克拉; the path to the remark.js library, which is the power to drive the presentation)
-
-- [Nature transformation](https://naruto.fandom.com/wiki/Nature_Transformation) (性質変化; transform the chakra by setting different options)
-
-- The [infinite moon reader](https://naruto.fandom.com/wiki/Infinite_Tsukuyomi) (無限月読; start a local web server to continuously serve your slides)
-
-- The [summoning technique](https://naruto.fandom.com/wiki/Summoning_Technique) (download remark.js from the web)
-
-You can click the links to know more about them if you want. The jutsu "Moon Reader" may seem a little evil, but that does not mean your slides are evil.
-
----
-
-class: center
-
-# Hand seals (印)
-
-Press `h` or `?` to see the possible ninjutsu you can use in remark.js.
-
-![](https://upload.wikimedia.org/wikipedia/commons/7/7e/Mudra-Naruto-KageBunshin.svg)
-
----
-
-class: center, middle
-
-# Thanks!
-
-Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).
-
-The chakra comes from [remark.js](https://remarkjs.com), [**knitr**](https://yihui.org/knitr/), and [R Markdown](https://rmarkdown.rstudio.com).
+<div id="htmlwidget-41a9b8fa713666d3055d" style="width:100%;height:432px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-41a9b8fa713666d3055d">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]}],"setView":[[42.0285,-93.65],17,[]]},"evals":[],"jsHooks":[]}</script>
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
