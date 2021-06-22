@@ -1,0 +1,16 @@
+USEFUL SAMPLES
+
+# Bayesian Network 
+
+
+.pull-left[
+```{r plot-label, eval=FALSE}
+dag  <- hc(diabetes)
+qgraph(dag)
+```
+]
+
+.pull-right[
+```{r plot-label-out, ref.label="plot-label", echo=FALSE, fig.height=8,fig.retina=5,out.height="75%", out.width="90%"}
+```
+]

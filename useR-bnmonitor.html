@@ -3,8 +3,7 @@
   <head>
     <title>bnmonitor: Checking the Robustness and Sensitivity of Bayesian Networks</title>
     <meta charset="utf-8" />
-    <meta name="author" content="Rachel Wilkerson, Manuele Leonelli, Ramsiya Ramanathan" />
-    <meta name="date" content="2021-07-09" />
+    <meta name="author" content="Dr. Rachel Wilkerson   Founder at Tesserwell, LLC     rachwhatsit      @rlwilkerson     rachel.lynne.wilkerson@gmail.com" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
     <script src="libs/htmlwidgets/htmlwidgets.js"></script>
@@ -16,30 +15,25 @@
     <script src="libs/dt-core/js/jquery.dataTables.min.js"></script>
     <link href="libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
     <script src="libs/crosstalk/js/crosstalk.min.js"></script>
-    <link href="libs/leaflet/leaflet.css" rel="stylesheet" />
-    <script src="libs/leaflet/leaflet.js"></script>
-    <link href="libs/leafletfix/leafletfix.css" rel="stylesheet" />
-    <script src="libs/proj4/proj4.min.js"></script>
-    <script src="libs/Proj4Leaflet/proj4leaflet.js"></script>
-    <link href="libs/rstudio_leaflet/rstudio_leaflet.css" rel="stylesheet" />
-    <script src="libs/leaflet-binding/leaflet.js"></script>
   </head>
   <body>
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
 # <code>bnmonitor</code>: Checking the Robustness and Sensitivity of Bayesian Networks
-### Rachel Wilkerson, Manuele Leonelli, Ramsiya Ramanathan
-### Baylor University, IE University, Madrid, Università di Bologna, Bologna, Italy
-### July 9, 2021
+### Dr. Rachel Wilkerson <br> Founder at <a href="https://www.tesserwell.co/">Tesserwell, LLC</a> <br> <a href="https://github.com/rachwhatsit"><i class="fa fa-github fa-fw"></i>  rachwhatsit</a><br> <a href="https://twitter.com/rlwilkerson?lang=en"> <i class="fa fa-twitter fa-fw"></i>   <span class="citation">@rlwilkerson</span></a><br> <a href="mailto:rachelw52@gmail.com"> <i class="fa fa-paper-plane fa-fw"></i>  rachel.lynne.wilkerson@gmail.com</a><br>
+### 2021-07-09   <img src="user-logo-color.png" alt="drawing" width="100"/> <br><br> Slides available at <a href="http://bit.ly/infer-useR" class="uri">http://bit.ly/infer-useR</a> <br> Package webpage at <a href="https://cran.r-project.org/web/packages/bnmonitor/index.html" class="uri">https://cran.r-project.org/web/packages/bnmonitor/index.html</a>
 
 ---
 
+
+
  
 # Package Overview
-- `bnmonitor` provides a suite of diagnostic monitors that can be used in increasing fineness to check the accuracy of forecasts flowing from a model 
 
-- The sensitivity functions check the effect of changes to the probability distributions
+- `bnmonitor` provides a suite of diagnostic monitors that can be used in increasing fineness to check the **accuracy of forecasts** flowing from a model 
+
+- The sensitivity functions check the **effect of changes to the probability distributions**
 
 - Robustness monitors work on BNs learned from data
 
@@ -50,7 +44,7 @@ class: center, middle, inverse, title-slide
 #Example: Diabetes 
 
 We illustrate our package with what the UCI Repository refers to as the Pima Indian dataset. 
-It consists of 392 observation with the following variables, discretized according to XX
+It consists of 392 observation with the following variables, discretized according to `{r Citet(bib, "Nojavan2017")}`:
  
 - PREG: number of times pregnant (low/high)
 
@@ -76,83 +70,125 @@ background-image: url("libs/img/women-Pima-shinny-game-field-hockey.jpeg")
 background-position: contain
 class: center, bottom, inverse
 
-We chose this dataset as it best showcases our monitors. However, we acknowledge that we are using the data without compensating the original Akimel O’odham participants. 
-The isolation imposed by the political boundaries of this isolation created a useful dataset at the expense of the liberty of the Akimel O’odham. 
-XX footnote digital natives
+We chose this dataset as it best showcases our monitors. However, we acknowledge that we are using the data without the explicit consent of or compensation for the original Akimel O’odham participants. For more information see &lt;a name=cite-radin2017digital&gt;&lt;/a&gt;[Radin (2017)](#bib-radin2017digital).
 
 ???
 Image credit: [Britannica](https://www.britannica.com/topic/Pima-people)
 
 ---
+class: inverse, center, middle
+
+# Robustness 
+
+---
+class: center, middle 
+
+# Prequential = Sequential + predictions 🔮
 
 
 
-<div id="htmlwidget-98ee0f3d60ff4299d637" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-98ee0f3d60ff4299d637">{"x":{"filter":"none","fillContainer":false,"data":[["4","5","7","9","14","15","17","19","20","21"],["low","low","high","high","low","high","low","low","low","high"],["low","high","low","high","high","high","low","low","low","high"],["low","low","low","high","low","high","high","low","high","high"],["low","high","high","high","low","low","high","high","high","high"],["low","high","low","high","high","high","high","low","low","high"],["low","high","low","low","low","low","high","high","high","high"],["low","high","low","low","low","high","high","low","high","high"],["low","high","low","high","high","high","high","high","high","high"],["neg","pos","pos","pos","pos","pos","pos","neg","pos","neg"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>PREG<\/th>\n      <th>GLUC<\/th>\n      <th>PRES<\/th>\n      <th>TRIC<\/th>\n      <th>INS<\/th>\n      <th>MASS<\/th>\n      <th>PED<\/th>\n      <th>AGE<\/th>\n      <th>DIAB<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}],"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+
+
+
 ---
 # Bayesian Network 
 
+
+.pull-left[
 
 ```r
 dag  &lt;- hc(diabetes)
 qgraph(dag)
 ```
 
-![](useR-bnmonitor_files/figure-html/dag-1.png)&lt;!-- --&gt;
+&lt;img src="useR-bnmonitor_files/figure-html/daghc-1.png" width="90%" height="75%" /&gt;
+]
 
----
-class: inverse, center, middle
+.pull-right[
 
-# Robustness
+```r
+dag2  &lt;- mmhc(diabetes)
+qgraph(dag2)
+```
+
+&lt;img src="useR-bnmonitor_files/figure-html/dagmmhc-1.png" width="90%" height="75%" /&gt;
+]
 
 ---
 
 ```r
-global_monitor(dag = dag , df = diabetes,alpha=2)
+dag2  &lt;- mmhc(diabetes)
+qgraph(dag2)
 ```
 
-```
-##   Vertex    Score
-## 1   PREG 236.2658
-## 2   GLUC 274.3482
-## 3   PRES 250.0871
-## 4   TRIC 267.1841
-## 5    INS 219.8782
-## 6   MASS 231.8470
-## 7    PED 272.6041
-## 8    AGE 246.5046
-## 9   DIAB 214.0108
-```
+![](useR-bnmonitor_files/figure-html/bngs-1.png)&lt;!-- --&gt;
 
+???
+
+can compute the BF in bnlearn package, ours shows the contributions
+---
+# Global monitors 
+
+.pull-left[
+
+```r
+glb.mon &lt;- global_monitor(dag = dag , df = diabetes,alpha=2)
+```
+]
+
+.pull-right[
+
+```r
+glb.mon2 &lt;- global_monitor(dag = dag2 , df = diabetes,alpha=2)
+```
+]
 - `\(\alpha\)` is commonly set as the maximum number of levels for a node in the dataset
 
 ???
 global monitors are used to compare moodels
 ---
-# Prequential Monitors
+# Prequential Monitors 
 
-\citet{Dawid1992} and were developed in \citet{Cowell2006,Cowell2007}
+- Prequential monitors were first developed by &lt;a name=cite-Dawid1992&gt;&lt;/a&gt;[Dawid (1992)](#bib-Dawid1992) and refined inin &lt;a name=cite-Cowell2006&gt;&lt;/a&gt;&lt;a name=cite-Cowell2007&gt;&lt;/a&gt;[Cowell, Dawid, Lauritzen, and Spiegelhalter (2006)](#bib-Cowell2006); [Cowell, Verrall, and Yoon (2007)](#bib-Cowell2007).
+
 - `\(p_i\)` gives the predictive density of the BN learned using the dataset `\(x_{[i-1]}\)` including only the first `\(i-1\)`-th observations
 
-- the level of surprise of observing the value `\(y_j\in\mathbb{Y}_j\)` for the `\(j\)`-th variable after having processed `\(i\)` observations is:  
+- the level of surprise 😲 of observing the value `\(y_j\in\mathbb{Y}_j\)` for the `\(j\)`-th variable after having processed `\(i\)` observations is:  
 `$$S_{ij} = -\log(p_i(y_j)))$$`
 
-- We use the logarithmic score function here, but other score functions can certainly be used. 
+- We use the logarithmic score function here, but other score functions can certainly be substituted 
+
+---
+
+<div id="htmlwidget-0ca483c028305295f52b" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0ca483c028305295f52b">{"x":{"filter":"none","fillContainer":false,"data":[["4","5","7","9","14","15","17","19","20","21"],["low","low","high","high","low","high","low","low","low","high"],["low","high","low","high","high","high","low","low","low","high"],["low","low","low","high","low","high","high","low","high","high"],["low","high","high","high","low","low","high","high","high","high"],["low","high","low","high","high","high","high","low","low","high"],["low","high","low","low","low","low","high","high","high","high"],["low","high","low","low","low","high","high","low","high","high"],["low","high","low","high","high","high","high","high","high","high"],["neg","pos","pos","pos","pos","pos","pos","neg","pos","neg"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>PREG<\/th>\n      <th>GLUC<\/th>\n      <th>PRES<\/th>\n      <th>TRIC<\/th>\n      <th>INS<\/th>\n      <th>MASS<\/th>\n      <th>PED<\/th>\n      <th>AGE<\/th>\n      <th>DIAB<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":8,"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}],"lengthMenu":[8,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+
+??? 
+
+j indicates the values high/low and i indicates the node of interest.
+
 
 ---
 # Standardization
 
+
 - Relative standardization compares the log likelihood contributions to two different models. 
 
-- Absolute standardization computes a Z-statistic using the following expectation and variance
+--
+
+- Absolute standardization computes a Z-statistic using the following expectation and variance:
+
+--
 
 - `$$E_{ij} = \sum_{y_j\in\mathbb{Y}_j}p_i(y_j)\log(p_i(y_j))$$`
 
 - `$$V_{ij}=\sum_{y_j\in\mathbb{Y}_j}p_i(y_j)\log(p_i(y_j))^2-E_{ij}^2$$`
 
+--
+
 - `$$Z_{ij}=\frac{\sum_{k=1}^iS_{kj}-\sum_{k=1}^iE_{kj}}{\sqrt{\sum_{k=1}^i}V_{kj}}$$`
 
-- values of and  `\(| Z_{ij}|&gt; 1.96\)` in absolute value may be an indication of poor model fit
+- `\(| Z_{ij}|&gt; 1.96\)` in absolute value may be an indication of poor model fit
 
 ---
 # Marginal node monitors 
@@ -162,30 +198,45 @@ global monitors are used to compare moodels
 
 ```r
 marg.ped &lt;- plot(seq_marg_monitor(dag, diabetes, "PED"))
-```
-
-```
-## 
-## Attaching package: 'gRbase'
-```
-
-```
-## The following object is masked from 'package:qgraph':
-## 
-##     qgraph
-```
-
-```
-## The following objects are masked from 'package:bnlearn':
-## 
-##     ancestors, children, parents
-```
-
-```r
 marg.ped + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
 ```
 
-![](useR-bnmonitor_files/figure-html/node good fit-1.png)&lt;!-- --&gt;
+&lt;img src="useR-bnmonitor_files/figure-html/node good fit-1.png" width="504" /&gt;
+
+---
+
+```r
+ggplot(iris) + 
+  aes(Sepal.Length, 
+      Sepal.Width, 
+      color = Species) + 
+  geom_point(size = 4) +
+  labs(x = 'Sepal Length', 
+       y = 'Sepal Width') + 
+  theme_minimal() +
+  theme(
+    text = element_text(size = 24, family = "PT Sans")
+  )
+```
+
+.plot-callout[
+
+```r
+ggplot(iris) + 
+  aes(Sepal.Length, 
+      Sepal.Width, 
+      color = Species) + 
+  geom_point(size = 4) +
+  labs(x = 'Sepal Length', 
+       y = 'Sepal Width') + 
+  theme_minimal() +
+  theme(
+    text = element_text(size = 24, family = "PT Sans")
+  )
+```
+
+![](useR-bnmonitor_files/figure-html/large-plot-callout-1.png)&lt;!-- --&gt;
+]
 
 - The marginal node monitor for PED (diabetes pedigree function) indicates a good fit.
 
@@ -196,13 +247,7 @@ Here the pedigree of diabetes suggests that the forecasts flowing from the model
 ---
 # Marginal node monitors 
 
-
-```r
-marg.diab &lt;- plot(seq_marg_monitor(dag, diabetes, "DIAB"))
-marg.diab + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
-```
-
-![](useR-bnmonitor_files/figure-html/node bad fit-1.png)&lt;!-- --&gt;
+&lt;img src="useR-bnmonitor_files/figure-html/node bad fit-1.png" width="504" /&gt;
 
 - The marginal node monitor for DIAB (diabetes) suggests that the the marginal distribution may be inappropriate for later forecasts.
 
@@ -212,15 +257,10 @@ By contrast, the marginal sequential node monitor suggests that the probability 
 ---
 # Conditional node monitors 
 
-
-```r
-cond.preg &lt;- plot(seq_cond_monitor(dag, diabetes, "PREG")) 
-cond.preg + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
-```
-
-![](useR-bnmonitor_files/figure-html/cond monitor-1.png)&lt;!-- --&gt;
+&lt;img src="useR-bnmonitor_files/figure-html/cond monitor-1.png" width="504" /&gt;
 
 - The conditional node monitor for PREG (pregnancy) indicates a poor fit to early forecasts in the data. 
+
 
 ---
 # Parent child monitor
@@ -231,7 +271,7 @@ cond.preg + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geo
 plot(seq_pa_ch_monitor(dag , diabetes , "PREG",pa.names = "AGE", pa.val = "low",alpha=2))+ geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
 ```
 
-![](useR-bnmonitor_files/figure-html/pach monitor-1.png)&lt;!-- --&gt;
+&lt;img src="useR-bnmonitor_files/figure-html/pach monitor-1.png" width="504" /&gt;
 
 ??? 
 
@@ -245,7 +285,7 @@ class: inverse, center, middle
 # Sensitivity
 
 ---
-
+The vertex of most interest is \texttt{DIAB} reporting the result of a diabetes test (either positive or negative). As an illustration, we first investigate how the probability of a positive test depends on the variable \texttt{GLUC} = high. 
 
 ---
 
@@ -253,326 +293,113 @@ class: inverse, center, middle
 sens_dc &lt;- sensitivity(bn, interest_node = "DIAB", interest_node_value = "pos", node = "GLUC", value_node = "high", value_parents = NULL, new_value = "all")
 sens_dic  &lt;-   sensitivity(bn , interest_node = "DIAB",interest_node_value =   "pos",evidence_nodes = "INS", evidence_states = "low",node = "GLUC", value_node = "high",value_parents = NULL , new_value = "all")
 par(mfrow=c(1,2))
-plot(sens_dc)
+plot(sens_dc);plot(sens_dic)  
 ```
 
-![](useR-bnmonitor_files/figure-html/sens-1.png)&lt;!-- --&gt;
-
-```r
-plot(sens_dic)  
-```
-
-![](useR-bnmonitor_files/figure-html/sens-2.png)&lt;!-- --&gt;
----
-
-
-```r
-cd_g &lt;- CD(bn , node = "GLUC", value_node = "high",value_parents = NULL , new_value = "all")
-cd_d &lt;- CD(bn , node = "DIAB", value_node = "pos",value_parents = c("high","high"), new_value = "all")
-par(mfrow=c(1,2))
-plot(cd_g); plot(cd_d)
-```
-
-![](useR-bnmonitor_files/figure-html/cd-1.png)&lt;!-- --&gt;![](useR-bnmonitor_files/figure-html/cd-2.png)&lt;!-- --&gt;
----
-
-
-```r
-sensquery(bn, interest_node = "DIAB",interest_node_value = "pos", new_value = 0.4,evidence_nodes = "PRES", evidence_states = "high")
-```
-
-```
-##   Node Value node Value parents Original value Suggested change CD distance
-## 1 GLUC        low                   0.48724490        0.4409133   0.1864248
-## 2 PRES        low           low     0.60846561        0.6993007   0.4031032
-## 3 DIAB        pos       low,low     0.05660377        0.1250558   0.8680104
-## 4 MASS       high           low     0.26063830        0.4817689   0.9696970
-## 5  AGE        low       low,neg     0.70344828        0.9266871   1.6731065
-```
-
----
+&lt;img src="useR-bnmonitor_files/figure-html/unnamed-chunk-2-1.png" width=".49\linewidth" /&gt;&lt;img src="useR-bnmonitor_files/figure-html/unnamed-chunk-2-2.png" width=".49\linewidth" /&gt;
 
 ???
 
-Image credit: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Sharingan_triple.svg)
+The vertex of most interest is DIAB reporting the result of a diabetes test (either positive or negative). As an illustration, we first investigate how the probability of a positive test depends on the variable GLUC = high. 
+he plot shows that has the probability of having a high level of glucose increases, then also the probability of a positive test increases.
 
-
-
-You are recommended to use the [RStudio IDE](https://www.rstudio.com/products/rstudio/), but you do not have to.
-
-- Create a new R Markdown document from the menu `File -&gt; New File -&gt; R Markdown -&gt; From Template -&gt; Ninja Presentation`;&lt;sup&gt;1&lt;/sup&gt;
-
---
-
-- Click the `Knit` button to compile it;
-
---
-
-- or use the [RStudio Addin](https://rstudio.github.io/rstudioaddins/)&lt;sup&gt;2&lt;/sup&gt; "Infinite Moon Reader" to live preview the slides (every time you update and save the Rmd document, the slides will be automatically reloaded in RStudio Viewer.
-
-.footnote[
-[1] 中文用户请看[这份教程](https://slides.yihui.org/xaringan/zh-CN.html)
-
-[2] See [#2](https://github.com/yihui/xaringan/issues/2) if you do not see the template or addin in RStudio.
-]
-
----
-background-image: url(https://github.com/yihui/xaringan/releases/download/v0.0.2/karl-moustache.jpg)
-background-position: 50% 50%
-class: center, bottom, inverse
-
-# You only live once!
+In the previous example the probability of interest was the marginal probability of a positive test. Similarly, we can assess how generic conditional probabilities are affected by changes in the model. As an illustration, let's consider the conditional probability of a positive test given a low level of insulin and this varies when the probability of a high level of glucose changes. This can be done similarly to the previous code, but now we have to fix the evidence nodes and evidence states inputs.
+again the output (conditional) probability of a positive test increases when the probability of a high level of glucose increases. Notice that in this case the increase is non-linear as expected from the results of \citet{Coupe2002}.
 
 ---
 
-# Hello Ninja
+&lt;img src="useR-bnmonitor_files/figure-html/unnamed-chunk-3-1.png" width=".49\linewidth" style="display: block; margin: auto;" /&gt;&lt;img src="useR-bnmonitor_files/figure-html/unnamed-chunk-3-2.png" width=".49\linewidth" style="display: block; margin: auto;" /&gt;
 
-As a presentation ninja, you certainly should not be satisfied by the "Hello World" example. You need to understand more about two things:
+???
 
-1. The [remark.js](https://remarkjs.com) library;
+We now might be interested in knowing how much changes in the probability of high glucose affect the overall probability distribution of the BN. We compute the CD distance using the \texttt{CD} function and the associated \texttt{plot} method. 
 
-1. The **xaringan** package;
+The output is given in Figure \ref{fig:CD1} and one can see that the original value of this probability was around 0.5 since the CD is zero.
 
-Basically **xaringan** injected the chakra of R Markdown (minus Pandoc) into **remark.js**. The slides are rendered by remark.js in the web browser, and the Markdown source needed by remark.js is generated from R Markdown (**knitr**).
-
+As an illustration let's consider the CD distance when the conditional probability of a positive diabetes test given a high body mass index and a high glucose is varied.
+The plot is reported in Figure \ref{fig:CD2} and we can notice that overall the CD distance is smaller for changes of this probability compared to the one in Figure \ref{fig:CD1}.
 ---
-
-# remark.js
-
-You can see an introduction of remark.js from [its homepage](https://remarkjs.com). You should read the [remark.js Wiki](https://github.com/gnab/remark/wiki) at least once to know how to
-
-- create a new slide (Markdown syntax&lt;sup&gt;*&lt;/sup&gt; and slide properties);
-
-- format a slide (e.g. text alignment);
-
-- configure the slideshow;
-
-- and use the presentation (keyboard shortcuts).
-
-It is important to be familiar with remark.js before you can understand the options in **xaringan**.
-
-.footnote[[*] It is different with Pandoc's Markdown! It is limited but should be enough for presentation purposes. Come on... You do not need a slide for the Table of Contents! Well, the Markdown support in remark.js [may be improved](https://github.com/gnab/remark/issues/142) in the future.]
-
----
-background-image: url(https://github.com/yihui/xaringan/releases/download/v0.0.2/karl-moustache.jpg)
-background-size: cover
-class: center, bottom, inverse
-
-# I was so happy to have discovered remark.js!
-
----
-class: inverse, middle, center
-
-# Using xaringan
-
----
-
-# xaringan
-
-Provides an R Markdown output format `xaringan::moon_reader` as a wrapper for remark.js, and you can use it in the YAML metadata, e.g.
-
-```yaml
----
-title: "A Cool Presentation"
-output:
-  xaringan::moon_reader:
-    yolo: true
-    nature:
-      autoplay: 30000
----
-```
-
-See the help page `?xaringan::moon_reader` for all possible options that you can use.
-
----
-
-# remark.js vs xaringan
-
-Some differences between using remark.js (left) and using **xaringan** (right):
-
-.pull-left[
-1. Start with a boilerplate HTML file;
-
-1. Plain Markdown;
-
-1. Write JavaScript to autoplay slides;
-
-1. Manually configure MathJax;
-
-1. Highlight code with `*`;
-
-1. Edit Markdown source and refresh browser to see updated slides;
-]
-
-.pull-right[
-1. Start with an R Markdown document;
-
-1. R Markdown (can embed R/other code chunks);
-
-1. Provide an option `autoplay`;
-
-1. MathJax just works;&lt;sup&gt;*&lt;/sup&gt;
-
-1. Highlight code with `{{}}`;
-
-1. The RStudio addin "Infinite Moon Reader" automatically refreshes slides on changes;
-]
-
-.footnote[[*] Not really. See next page.]
-
----
-
-# Math Expressions
-
-You can write LaTeX math expressions inside a pair of dollar signs, e.g. &amp;#36;\alpha+\beta$ renders `\(\alpha+\beta\)`. You can use the display style with double dollar signs:
-
-```
-$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
-```
-
-`$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$`
-
-Limitations:
-
-1. The source code of a LaTeX math expression must be in one line, unless it is inside a pair of double dollar signs, in which case the starting `$$` must appear in the very beginning of a line, followed immediately by a non-space character, and the ending `$$` must be at the end of a line, led by a non-space character;
-
-1. There should not be spaces after the opening `$` or before the closing `$`.
-
-1. Math does not work on the title slide (see [#61](https://github.com/yihui/xaringan/issues/61) for a workaround).
-
----
-
-# R Code
 
 
 ```r
-# a boring regression
-fit = lm(dist ~ 1 + speed, data = cars)
-coef(summary(fit))
-```
-
-```
-#               Estimate Std. Error   t value     Pr(&gt;|t|)
-# (Intercept) -17.579095  6.7584402 -2.601058 1.231882e-02
-# speed         3.932409  0.4155128  9.463990 1.489836e-12
-```
-
-```r
-dojutsu = c('地爆天星', '天照', '加具土命', '神威', '須佐能乎', '無限月読')
-grep('天', dojutsu, value = TRUE)
-```
-
-```
-# [1] "地爆天星" "天照"
-```
-
----
-
-# R Plots
-
-
-```r
-par(mar = c(4, 4, 1, .1))
-plot(cars, pch = 19, col = 'darkgray', las = 1)
-abline(fit, lwd = 2)
-```
-
-![](useR-bnmonitor_files/figure-html/cars-1.svg)&lt;!-- --&gt;
-
----
-
-# Tables
-
-If you want to generate a table, make sure it is in the HTML format (instead of Markdown or other formats), e.g.,
-
-
-```r
-knitr::kable(head(iris), format = 'html')
+snsqur.diab &lt;- sensquery(bn, interest_node = "DIAB",interest_node_value = "pos", new_value = 0.4,evidence_nodes = "PRES", evidence_states = "high");
+knitr::kable(snsqur.diab, format = 'html')
 ```
 
 &lt;table&gt;
  &lt;thead&gt;
   &lt;tr&gt;
-   &lt;th style="text-align:right;"&gt; Sepal.Length &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Sepal.Width &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Petal.Length &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; Petal.Width &lt;/th&gt;
-   &lt;th style="text-align:left;"&gt; Species &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Node &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Value node &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Value parents &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Original value &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Suggested change &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; CD distance &lt;/th&gt;
   &lt;/tr&gt;
  &lt;/thead&gt;
 &lt;tbody&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 5.1 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 3.5 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; GLUC &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt;  &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4872449 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4409133 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1864248 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 4.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 3.0 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; PRES &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.6084656 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.6993007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4031032 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 4.7 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 3.2 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.3 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; DIAB &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; pos &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low,low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0566038 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1250558 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.8680104 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 4.6 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 3.1 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.5 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; MASS &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2606383 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4817689 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.9696970 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 5.0 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 3.6 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.2 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 5.4 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 3.9 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.7 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 0.4 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; setosa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; AGE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low,neg &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.7034483 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.9266871 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.6731065 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 
----
-
-# HTML Widgets
-
-I have not thoroughly tested HTML widgets against **xaringan**. Some may work well, and some may not. It is a little tricky.
-
-Similarly, the Shiny mode (`runtime: shiny`) does not work. I might get these issues fixed in the future, but these are not of high priority to me. I never turn my presentation into a Shiny app. When I need to demonstrate more complicated examples, I just launch them separately. It is convenient to share slides with other people when they are plain HTML/JS applications.
-
-See the next page for two HTML widgets.
+???
+Last, we may check if probabilities implied by the BN are reasonable. Let's consider as an example the conditional probability of a positive diabetes test given a high pressure level. We can compute this probability using the \texttt{querygrain} function from the \texttt{gRain} package.
 
 ---
+# Co-Authors 
 
+Manuele Leonelli
+IE University, Madrid
 
-```r
-library(leaflet)
-leaflet() %&gt;% addTiles() %&gt;% setView(-93.65, 42.0285, zoom = 17)
-```
-
-<div id="htmlwidget-41a9b8fa713666d3055d" style="width:100%;height:432px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-41a9b8fa713666d3055d">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]}],"setView":[[42.0285,-93.65],17,[]]},"evals":[],"jsHooks":[]}</script>
+Ramsiya Ramanathan
+Università di Bologna, Bologna, Italy
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
 "highlightStyle": "github",
 "highlightLines": true,
-"countIncrementalSlides": false
+"countIncrementalSlides": false,
+"css": ["useR", "useR-fonts"]
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));

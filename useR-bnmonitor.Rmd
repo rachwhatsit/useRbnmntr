@@ -1,8 +1,7 @@
 ---
 title: "`bnmonitor`: Checking the Robustness and Sensitivity of Bayesian Networks"
-author: "Rachel Wilkerson, Manuele Leonelli, Ramsiya Ramanathan"
-institute: "Baylor University, IE University, Madrid, Università di Bologna, Bologna, Italy"
-date: "July 9, 2021"
+author: 'Dr. Rachel Wilkerson <br> Founder at <a href="https://www.tesserwell.co/">Tesserwell, LLC</a> <br> <a href="https://github.com/rachwhatsit"><i class="fa fa-github fa-fw"></i>&nbsp; rachwhatsit</a><br> <a href="https://twitter.com/rlwilkerson?lang=en"> <i class="fa fa-twitter fa-fw"></i> &nbsp; @rlwilkerson</a><br> <a href="mailto:rachelw52@gmail.com"> <i class="fa fa-paper-plane fa-fw"></i>&nbsp; rachel.lynne.wilkerson@gmail.com</a><br>'
+date: 2021-07-09 &ensp; <img src="user-logo-color.png" alt="drawing" width="100"/>  <br><br> Slides available at <http://bit.ly/infer-useR>  <br> Package webpage at <https://cran.r-project.org/web/packages/bnmonitor/index.html>
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -10,15 +9,25 @@ output:
       highlightStyle: github
       highlightLines: true
       countIncrementalSlides: false
-    xaringan::moon_reader:
       css: ["useR", "useR-fonts"]
 
 ---
+
+```{r, load_refs, include=FALSE, cache=FALSE}
+
+options(htmltools.dir.version = FALSE)
+library(RefManageR)
+BibOptions(check.entries = FALSE, bib.style = "authoryear", style = "markdown",
+           dashed = TRUE)
+bib <- ReadBib("/Users/eusa/Documents/useRbnmntr/Bib.bib")
+
+```
  
 # Package Overview
-- `bnmonitor` provides a suite of diagnostic monitors that can be used in increasing fineness to check the accuracy of forecasts flowing from a model 
 
-- The sensitivity functions check the effect of changes to the probability distributions
+- `bnmonitor` provides a suite of diagnostic monitors that can be used in increasing fineness to check the **accuracy of forecasts** flowing from a model 
+
+- The sensitivity functions check the **effect of changes to the probability distributions**
 
 - Robustness monitors work on BNs learned from data
 
@@ -29,7 +38,7 @@ output:
 #Example: Diabetes 
 
 We illustrate our package with what the UCI Repository refers to as the Pima Indian dataset. 
-It consists of 392 observation with the following variables, discretized according to XX
+It consists of 392 observation with the following variables, discretized according to `{r Citet(bib, "Nojavan2017")}`:
  
 - PREG: number of times pregnant (low/high)
 
@@ -55,14 +64,21 @@ background-image: url("libs/img/women-Pima-shinny-game-field-hockey.jpeg")
 background-position: contain
 class: center, bottom, inverse
 
-We chose this dataset as it best showcases our monitors. However, we acknowledge that we are using the data without compensating the original Akimel O’odham participants. 
-The isolation imposed by the political boundaries of this isolation created a useful dataset at the expense of the liberty of the Akimel O’odham. 
-XX footnote digital natives
+We chose this dataset as it best showcases our monitors. However, we acknowledge that we are using the data without the explicit consent of or compensation for the original Akimel O’odham participants. For more information see `r Citet(bib, "radin2017digital")`.
 
 ???
 Image credit: [Britannica](https://www.britannica.com/topic/Pima-people)
 
 ---
+class: inverse, center, middle
+
+# Robustness 
+
+---
+class: center, middle 
+
+# Prequential = Sequential + predictions `r emo::ji("crystal_ball")`
+
 
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
@@ -71,9 +87,62 @@ library("bnmonitor")
 library("bnlearn")
 library("qgraph")
 library("ggplot2")
+library("emo")
 
 load("diabetes.RData")
 ```
+
+
+
+---
+# Bayesian Network 
+
+
+.pull-left[
+```{r daghc, eval=TRUE,fig.height=8,fig.retina=5,out.height="75%", out.width="90%"}
+dag  <- hc(diabetes)
+qgraph(dag)
+```
+]
+
+.pull-right[
+```{r dagmmhc, eval=TRUE,fig.height=8,fig.retina=5,out.height="75%", out.width="90%"}
+dag2  <- mmhc(diabetes)
+qgraph(dag2)
+```
+]
+
+???
+
+can compute the BF in bnlearn package, ours shows the contributions
+---
+# Global monitors 
+
+``` {r glb}
+glb.mon <- global_monitor(dag = dag , df = diabetes,alpha=2)
+glb.mon2 <- global_monitor(dag = dag2 , df = diabetes,alpha=2)
+glb <- as.data.frame(cbind(glb.mon$Global_Monitor$Vertex, glb.mon$Global_Monitor$Score, glb.mon2$Global_Monitor$Score, glb.mon$Global_Monitor$Score/glb.mon2$Global_Monitor$Score))
+colnames(glb) <- c("Vertex", "dag_hc","dag_mmhc","bf_vertex")
+knitr::kable(glb, format = 'html')
+```
+]
+- $\alpha$ is commonly set as the maximum number of levels for a node in the dataset
+
+???
+global monitors are used to compare moodels
+---
+# Prequential Monitors 
+
+- Prequential monitors were first developed by `r Citet(bib, "Dawid1992")` and refined inin `r Citet(bib, "Cowell2006","Cowell2007")`.
+
+- $p_i$ gives the predictive density of the BN learned using the dataset $x_{[i-1]}$ including only the first $i-1$-th observations
+
+- the level of surprise `r emo::ji("astonished_face")` of observing the value $y_j\in\mathbb{Y}_j$ for the $j$-th variable after having processed $i$ observations is:  
+$$S_{ij} = -\log(p_i(y_j)))$$
+
+- We use the logarithmic score function here, but other score functions can certainly be substituted 
+
+---
 
 ```{r eval=require('DT'), tidy=FALSE,echo=FALSE}
 DT::datatable(
@@ -81,65 +150,63 @@ DT::datatable(
   fillContainer = FALSE, options = list(pageLength = 8)
 )
 ```
----
-# Bayesian Network 
 
-```{r dag}
+??? 
 
-dag  <- hc(diabetes)
-qgraph(dag)
-```
+j indicates the values high/low and i indicates the node of interest.
 
----
-class: inverse, center, middle
-
-# Robustness
-
----
-``` {r glb}
-global_monitor(dag = dag , df = diabetes,alpha=2)
-
-```
-
-- $\alpha$ is commonly set as the maximum number of levels for a node in the dataset
-
-???
-global monitors are used to compare moodels
----
-# Prequential Monitors
-
-\citet{Dawid1992} and were developed in \citet{Cowell2006,Cowell2007}
-- $p_i$ gives the predictive density of the BN learned using the dataset $x_{[i-1]}$ including only the first $i-1$-th observations
-
-- the level of surprise of observing the value $y_j\in\mathbb{Y}_j$ for the $j$-th variable after having processed $i$ observations is:  
-$$S_{ij} = -\log(p_i(y_j)))$$
-
-- We use the logarithmic score function here, but other score functions can certainly be used. 
 
 ---
 # Standardization
 
+
 - Relative standardization compares the log likelihood contributions to two different models. 
 
-- Absolute standardization computes a Z-statistic using the following expectation and variance
+--
+
+- Absolute standardization computes a Z-statistic using the following expectation and variance:
+
+--
 
 - $$E_{ij} = \sum_{y_j\in\mathbb{Y}_j}p_i(y_j)\log(p_i(y_j))$$
 
 - $$V_{ij}=\sum_{y_j\in\mathbb{Y}_j}p_i(y_j)\log(p_i(y_j))^2-E_{ij}^2$$
 
+--
+
 - $$Z_{ij}=\frac{\sum_{k=1}^iS_{kj}-\sum_{k=1}^iE_{kj}}{\sqrt{\sum_{k=1}^i}V_{kj}}$$
 
-- values of and  $| Z_{ij}|> 1.96$ in absolute value may be an indication of poor model fit
+- $| Z_{ij}|> 1.96$ in absolute value may be an indication of poor model fit
 
 ---
 # Marginal node monitors 
 
 - Marginal and conditional node monitors check the appropriateness of the probability distributions of each node
 
-``` {r node good fit,warning=FALSE, include=TRUE}
+``` {r node good fit,warning=FALSE, include=TRUE,message=FALSE,as.is=TRUE,fig.retina=5}
 marg.ped <- plot(seq_marg_monitor(dag, diabetes, "PED"))
 marg.ped + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
 ```
+
+---
+```{r large-plot, eval=FALSE}
+ggplot(iris) + 
+  aes(Sepal.Length, 
+      Sepal.Width, 
+      color = Species) + 
+  geom_point(size = 4) +
+  labs(x = 'Sepal Length', 
+       y = 'Sepal Width') + 
+  theme_minimal() +
+  theme(
+    text = element_text(size = 24, family = "PT Sans")
+  )
+```
+
+.plot-callout[
+```{r large-plot-callout, ref.label="large-plot", fig.callout=TRUE}
+```
+]
 
 - The marginal node monitor for PED (diabetes pedigree function) indicates a good fit.
 
@@ -150,7 +217,7 @@ Here the pedigree of diabetes suggests that the forecasts flowing from the model
 ---
 # Marginal node monitors 
 
-``` {r node bad fit, warning=FALSE, include=TRUE, echo=FALSE}
+``` {r node bad fit, warning=FALSE, include=TRUE, echo=FALSE,messages=FALSE,fig.retina=5}
 marg.diab <- plot(seq_marg_monitor(dag, diabetes, "DIAB"))
 marg.diab + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
 ```
@@ -163,18 +230,19 @@ By contrast, the marginal sequential node monitor suggests that the probability 
 ---
 # Conditional node monitors 
 
-``` {r cond monitor, warning=FALSE, include=TRUE, echo=FALSE}
+``` {r cond monitor, warning=FALSE, include=TRUE, echo=FALSE,fig.retina=5}
 cond.preg <- plot(seq_cond_monitor(dag, diabetes, "PREG")) 
 cond.preg + geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
 ```
 
 - The conditional node monitor for PREG (pregnancy) indicates a poor fit to early forecasts in the data. 
 
+
 ---
 # Parent child monitor
 
 
-```{r pach monitor,warning=FALSE, include=TRUE}
+```{r pach monitor,warning=FALSE, include=TRUE,fig.retina = 5}
 plot(seq_pa_ch_monitor(dag , diabetes , "PREG",pa.names = "AGE", pa.val = "low",alpha=2))+ geom_hline(yintercept = 1.96, linetype='dashed', col = 'red') +  geom_hline(yintercept = -1.96, linetype='dashed', col = 'red')
 ```
 
@@ -190,229 +258,58 @@ class: inverse, center, middle
 # Sensitivity
 
 ---
-
+The vertex of most interest is \texttt{DIAB} reporting the result of a diabetes test (either positive or negative). As an illustration, we first investigate how the probability of a positive test depends on the variable \texttt{GLUC} = high. 
 ``` {r bnfit, include = FALSE}
 bn <- bn.fit(dag , diabetes)
 ```
 ---
-``` {r sens fig.show="hold", out.width="50%"}
+``` {r, ,echo=TRUE, out.width='.49\\linewidth', fig.width=5, fig.height=5,fig.show='hold',fig.retina=5}
 sens_dc <- sensitivity(bn, interest_node = "DIAB", interest_node_value = "pos", node = "GLUC", value_node = "high", value_parents = NULL, new_value = "all")
 sens_dic  <-   sensitivity(bn , interest_node = "DIAB",interest_node_value =   "pos",evidence_nodes = "INS", evidence_states = "low",node = "GLUC", value_node = "high",value_parents = NULL , new_value = "all")
 par(mfrow=c(1,2))
-plot(sens_dc)
-plot(sens_dic)  
+plot(sens_dc);plot(sens_dic)  
 ```
+
+???
+
+The vertex of most interest is DIAB reporting the result of a diabetes test (either positive or negative). As an illustration, we first investigate how the probability of a positive test depends on the variable GLUC = high. 
+he plot shows that has the probability of having a high level of glucose increases, then also the probability of a positive test increases.
+
+In the previous example the probability of interest was the marginal probability of a positive test. Similarly, we can assess how generic conditional probabilities are affected by changes in the model. As an illustration, let's consider the conditional probability of a positive test given a low level of insulin and this varies when the probability of a high level of glucose changes. This can be done similarly to the previous code, but now we have to fix the evidence nodes and evidence states inputs.
+again the output (conditional) probability of a positive test increases when the probability of a high level of glucose increases. Notice that in this case the increase is non-linear as expected from the results of \citet{Coupe2002}.
+
 ---
 
-``` {r cd fig.show="hold", out.width="50%"}                    
+``` {r, ,echo=FALSE, out.width='.49\\linewidth', fig.width=5, fig.height=5, fig.show='hold',fig.align='center',fig.retina=5}                    
 cd_g <- CD(bn , node = "GLUC", value_node = "high",value_parents = NULL , new_value = "all")
 cd_d <- CD(bn , node = "DIAB", value_node = "pos",value_parents = c("high","high"), new_value = "all")
 par(mfrow=c(1,2))
 plot(cd_g); plot(cd_d)
 ```
+
+???
+
+We now might be interested in knowing how much changes in the probability of high glucose affect the overall probability distribution of the BN. We compute the CD distance using the \texttt{CD} function and the associated \texttt{plot} method. 
+
+The output is given in Figure \ref{fig:CD1} and one can see that the original value of this probability was around 0.5 since the CD is zero.
+
+As an illustration let's consider the CD distance when the conditional probability of a positive diabetes test given a high body mass index and a high glucose is varied.
+The plot is reported in Figure \ref{fig:CD2} and we can notice that overall the CD distance is smaller for changes of this probability compared to the one in Figure \ref{fig:CD1}.
 ---
 
 ``` {r snsqury}          
 snsqur.diab <- sensquery(bn, interest_node = "DIAB",interest_node_value = "pos", new_value = 0.4,evidence_nodes = "PRES", evidence_states = "high");
-kable(snsqur.diab)
+knitr::kable(snsqur.diab, format = 'html')
 ```
-
----
 
 ???
-
-Image credit: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Sharingan_triple.svg)
-
-
-
-You are recommended to use the [RStudio IDE](https://www.rstudio.com/products/rstudio/), but you do not have to.
-
-- Create a new R Markdown document from the menu `File -> New File -> R Markdown -> From Template -> Ninja Presentation`;<sup>1</sup>
-
---
-
-- Click the `Knit` button to compile it;
-
---
-
-- or use the [RStudio Addin](https://rstudio.github.io/rstudioaddins/)<sup>2</sup> "Infinite Moon Reader" to live preview the slides (every time you update and save the Rmd document, the slides will be automatically reloaded in RStudio Viewer.
-
-.footnote[
-[1] 中文用户请看[这份教程](https://slides.yihui.org/xaringan/zh-CN.html)
-
-[2] See [#2](https://github.com/yihui/xaringan/issues/2) if you do not see the template or addin in RStudio.
-]
+Last, we may check if probabilities implied by the BN are reasonable. Let's consider as an example the conditional probability of a positive diabetes test given a high pressure level. We can compute this probability using the \texttt{querygrain} function from the \texttt{gRain} package.
 
 ---
-background-image: url(`r xaringan:::karl`)
-background-position: 50% 50%
-class: center, bottom, inverse
+# Co-Authors 
 
-# You only live once!
+Manuele Leonelli
+IE University, Madrid
 
----
-
-# Hello Ninja
-
-As a presentation ninja, you certainly should not be satisfied by the "Hello World" example. You need to understand more about two things:
-
-1. The [remark.js](https://remarkjs.com) library;
-
-1. The **xaringan** package;
-
-Basically **xaringan** injected the chakra of R Markdown (minus Pandoc) into **remark.js**. The slides are rendered by remark.js in the web browser, and the Markdown source needed by remark.js is generated from R Markdown (**knitr**).
-
----
-
-# remark.js
-
-You can see an introduction of remark.js from [its homepage](https://remarkjs.com). You should read the [remark.js Wiki](https://github.com/gnab/remark/wiki) at least once to know how to
-
-- create a new slide (Markdown syntax<sup>*</sup> and slide properties);
-
-- format a slide (e.g. text alignment);
-
-- configure the slideshow;
-
-- and use the presentation (keyboard shortcuts).
-
-It is important to be familiar with remark.js before you can understand the options in **xaringan**.
-
-.footnote[[*] It is different with Pandoc's Markdown! It is limited but should be enough for presentation purposes. Come on... You do not need a slide for the Table of Contents! Well, the Markdown support in remark.js [may be improved](https://github.com/gnab/remark/issues/142) in the future.]
-
----
-background-image: url(`r xaringan:::karl`)
-background-size: cover
-class: center, bottom, inverse
-
-# I was so happy to have discovered remark.js!
-
----
-class: inverse, middle, center
-
-# Using xaringan
-
----
-
-# xaringan
-
-Provides an R Markdown output format `xaringan::moon_reader` as a wrapper for remark.js, and you can use it in the YAML metadata, e.g.
-
-```yaml
----
-title: "A Cool Presentation"
-output:
-  xaringan::moon_reader:
-    yolo: true
-    nature:
-      autoplay: 30000
----
-```
-
-See the help page `?xaringan::moon_reader` for all possible options that you can use.
-
----
-
-# remark.js vs xaringan
-
-Some differences between using remark.js (left) and using **xaringan** (right):
-
-.pull-left[
-1. Start with a boilerplate HTML file;
-
-1. Plain Markdown;
-
-1. Write JavaScript to autoplay slides;
-
-1. Manually configure MathJax;
-
-1. Highlight code with `*`;
-
-1. Edit Markdown source and refresh browser to see updated slides;
-]
-
-.pull-right[
-1. Start with an R Markdown document;
-
-1. R Markdown (can embed R/other code chunks);
-
-1. Provide an option `autoplay`;
-
-1. MathJax just works;<sup>*</sup>
-
-1. Highlight code with `{{}}`;
-
-1. The RStudio addin "Infinite Moon Reader" automatically refreshes slides on changes;
-]
-
-.footnote[[*] Not really. See next page.]
-
----
-
-# Math Expressions
-
-You can write LaTeX math expressions inside a pair of dollar signs, e.g. &#36;\alpha+\beta$ renders $\alpha+\beta$. You can use the display style with double dollar signs:
-
-```
-$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
-```
-
-$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
-
-Limitations:
-
-1. The source code of a LaTeX math expression must be in one line, unless it is inside a pair of double dollar signs, in which case the starting `$$` must appear in the very beginning of a line, followed immediately by a non-space character, and the ending `$$` must be at the end of a line, led by a non-space character;
-
-1. There should not be spaces after the opening `$` or before the closing `$`.
-
-1. Math does not work on the title slide (see [#61](https://github.com/yihui/xaringan/issues/61) for a workaround).
-
----
-
-# R Code
-
-```{r comment='#'}
-# a boring regression
-fit = lm(dist ~ 1 + speed, data = cars)
-coef(summary(fit))
-dojutsu = c('地爆天星', '天照', '加具土命', '神威', '須佐能乎', '無限月読')
-grep('天', dojutsu, value = TRUE)
-```
-
----
-
-# R Plots
-
-```{r cars, fig.height=4, dev='svg'}
-par(mar = c(4, 4, 1, .1))
-plot(cars, pch = 19, col = 'darkgray', las = 1)
-abline(fit, lwd = 2)
-```
-
----
-
-# Tables
-
-If you want to generate a table, make sure it is in the HTML format (instead of Markdown or other formats), e.g.,
-
-```{r}
-knitr::kable(head(iris), format = 'html')
-```
-
----
-
-# HTML Widgets
-
-I have not thoroughly tested HTML widgets against **xaringan**. Some may work well, and some may not. It is a little tricky.
-
-Similarly, the Shiny mode (`runtime: shiny`) does not work. I might get these issues fixed in the future, but these are not of high priority to me. I never turn my presentation into a Shiny app. When I need to demonstrate more complicated examples, I just launch them separately. It is convenient to share slides with other people when they are plain HTML/JS applications.
-
-See the next page for two HTML widgets.
-
----
-
-```{r out.width='100%', fig.height=6, eval=require('leaflet')}
-library(leaflet)
-leaflet() %>% addTiles() %>% setView(-93.65, 42.0285, zoom = 17)
-```
-
+Ramsiya Ramanathan
+Università di Bologna, Bologna, Italy
